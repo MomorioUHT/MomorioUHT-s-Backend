@@ -3,7 +3,7 @@ const validApiKey = require('../../middleware/validate-api-key');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
-const randomId = require('../../middleware/random-id');
+const generateRandomId = require('../../middleware/random-id');
 
 module.exports = (pool) => {
     const router = express.Router();
@@ -41,27 +41,32 @@ module.exports = (pool) => {
             try {
                 const title = req.body.title;
                 const artist = req.body.artist;
-                const uploaderId = req.user.id;
+                const uploaderId = req.body.uploaderId;
 
                 if (!title || !artist || !req.file) {
                     return res.status(400).json({ error: 'title, artist and image are required'});
                 }
 
                 const imagePath = `/uploads/fanart_posts/${req.file.filename}`;
-                const id = generateRamdomId(20);
+                const id = generateRandomId(20);
 
                 await pool.execute(
-                    'INSERT INTO fanart_posts (id, title, artist, image_path, user_id, creation_date) VALUES (?, ?, ?, ?, ?, NOW())',
+                    'INSERT INTO fanart_posts (id, title, artist, image_path, uploader, creation_date) VALUES (?, ?, ?, ?, ?, NOW())',
                     [id, title, artist, imagePath, uploaderId]
                 );
 
-                return res.status(201).json({ 
+                return res.status(201).json({
+                    success: true,
                     message: 'Fanart post created successfully',
-                    image: imagePath
+                    image: imagePath,
+                    id: id
                 });
             } catch (error) {
                 console.error('Internal Server Error: ', error);
-                return res.status(500).json({error: 'Internal Server Error'});
+                return res.status(500).json({
+                    success: false,
+                    error: 'Internal Server Error'
+                });
             }
         });
     })

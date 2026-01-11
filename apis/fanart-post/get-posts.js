@@ -6,7 +6,7 @@ module.exports = (pool) => {
 
     router.get('/', validApiKey, async (req, res) => {
         try {
-            let cmd = 'SELECT id,title,artist,uploader,image,creation_date FROM fanart_posts WHERE 1=1';
+            let cmd = 'SELECT id,title,artist,image_path,uploader,creation_date FROM fanart_posts WHERE 1=1';
             let params = [];
 
             if (req.query.id) {
